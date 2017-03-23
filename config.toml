@@ -1,5 +1,21 @@
-languageCode = "en-gb"
-title = "Alex Bowers' Blog"
 baseURL = "http://zando.io/"
-publishDir = "docs"
+title = "Alex Bowers' Blog"
+
+languageCode = "en-gb"
+
 theme = "hugo-theme-cactus-plus"
+publishDir = "docs"
+
+[params]
+  name = "Alex Bowers' Blog"
+  twitter = "bowersbros"
+  enableRSS = false
+
+  enableDisqus = false
+  enableGithubIssuesTips = true
+  enableGoogleAnalytics = false
+  enableBaiduAnalytics = false
+
+[social]
+  twitter-square = "https://twitter.com/bowersbros"
+  github-square = "https://github.com/alexbowers"

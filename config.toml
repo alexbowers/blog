@@ -1,3 +1,5 @@
-languageCode = "en-us"
-title = "My New Hugo Site"
-baseURL = "http://example.org/"
+languageCode = "en-gb"
+title = "Alex Bowers' Blog"
+baseURL = "http://zando.io/"
+publishDir = "docs"
+theme = "hugo-theme-cactus-plus"

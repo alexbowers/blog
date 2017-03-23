@@ -4,13 +4,13 @@
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		
+		<meta name="author" content="Alex Bowers&#39; Blog">
 		
 		<meta name="generator" content="Hugo 0.19" />
 		<title>Explaining Zend Module Entry &middot; Alex Bowers&#39; Blog</title>
 		<link rel="shortcut icon" href="http://zando.io/images/favicon.ico">
 		<link rel="stylesheet" href="http://zando.io/css/style.css">
-		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/atom-one-light.min.css">
+		<link rel="stylesheet" href="http://zando.io/css/highlight.css">
 		
 
 		
@@ -18,6 +18,57 @@
 		
 
 		
+
+		<meta property="og:title" content="Explaining Zend Module Entry" />
+<meta property="og:description" content="Contents  Getting Started Hello World Explaining Zend Module Entry  In my last blog post I skirted past what zend_module_entry does, and just put the code there. I&rsquo;m going to attempt to explain it with its many NULL values.
+This is what I put in the Hello World extension:
+zend_module_entry hello_module_entry = { STANDARD_MODULE_HEADER, PHP_HELLO_EXTNAME, hello_functions, NULL, NULL, NULL, NULL, NULL, PHP_HELLO_VERSION, STANDARD_MODULE_PROPERTIES, };  This structure comes from here:" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://zando.io/post/explaining-zend-module/" />
+
+
+
+<meta property="article:published_time" content="2016-09-05T22:07:42&#43;00:00"/>
+<meta property="article:modified_time" content="2016-09-05T22:07:42&#43;00:00"/>
+
+
+
+
+
+
+
+
+
+
+
+	    
+	    
+<meta itemprop="name" content="Explaining Zend Module Entry">
+<meta itemprop="description" content="Contents  Getting Started Hello World Explaining Zend Module Entry  In my last blog post I skirted past what zend_module_entry does, and just put the code there. I&rsquo;m going to attempt to explain it with its many NULL values.
+This is what I put in the Hello World extension:
+zend_module_entry hello_module_entry = { STANDARD_MODULE_HEADER, PHP_HELLO_EXTNAME, hello_functions, NULL, NULL, NULL, NULL, NULL, PHP_HELLO_VERSION, STANDARD_MODULE_PROPERTIES, };  This structure comes from here:">
+
+
+<meta itemprop="dateModified" content="2016-09-05T22:07:42&#43;00:00" />
+<meta itemprop="wordCount" content="397">
+
+
+
+<meta itemprop="keywords" content="" />
+
+	    
+
+  <meta name="twitter:card" content="summary"/>
+
+
+
+<meta name="twitter:text:title" content="Explaining Zend Module Entry"/>
+<meta name="twitter:title" content="Explaining Zend Module Entry"/>
+<meta name="twitter:description" content="Contents  Getting Started Hello World Explaining Zend Module Entry  In my last blog post I skirted past what zend_module_entry does, and just put the code there. I&rsquo;m going to attempt to explain it with its many NULL values.
+This is what I put in the Hello World extension:
+zend_module_entry hello_module_entry = { STANDARD_MODULE_HEADER, PHP_HELLO_EXTNAME, hello_functions, NULL, NULL, NULL, NULL, NULL, PHP_HELLO_VERSION, STANDARD_MODULE_PROPERTIES, };  This structure comes from here:"/>
+<meta name="twitter:site" content="@https://twitter.com/bowersbros"/>
+
 	</head>
 
     <body>
@@ -28,38 +79,20 @@
 	
 
 	
-		<a href='http://zando.io/post'>Archive</a>
-	
-
-	
-		<a href='http://zando.io/tags'>Tags</a>
-	
-
-	
 		<a href='http://zando.io/about'>About</a>
-	
-
 	
 
 	
 </nav>
 
-
-        <section class="wrapper">
+        <section id="wrapper">
             <article class="post">
                 <header>
-                    <h1>
-                        
-                            Explaining Zend Module Entry
-                        
-                    </h1>
+                    <h1>Explaining Zend Module Entry</h1>
                     <h2 class="headline">
-                    Sep 5, 2016 22:07
-                    · 397 words
-                    · 2 minutes read
-                      <span class="tags">
-                      
-                      </span>
+                    September 5, 2016 
+                    <br>
+                    
                     </h2>
                 </header>
                 <section id="post-body">
@@ -188,33 +221,98 @@
 
                 </section>
             </article>
+            <footer id="post-meta" class="clearfix">
+                <a href="https://twitter.com/bowersbros">
+                        <img class="avatar" src="http://zando.io/images/avatar.png">
+                        <div>
+                            <span class="dark">Alex Bowers&#39; Blog</span>
+                            <span></span>
+                        </div>
+                    </a>
+                <section id="sharing">
+                    <a class="twitter" href="https://twitter.com/intent/tweet?text=http%3a%2f%2fzando.io%2fpost%2fexplaining-zend-module%2f - Explaining%20Zend%20Module%20Entry by @bowersbros"><span class="icon-twitter"> Tweet</span></a>
+
+<a class="facebook" href="#" onclick="
+    window.open(
+      'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+      'facebook-share-dialog',
+      'width=626,height=436');
+    return false;"><span class="icon-facebook-rect"> Share</span>
+</a>
+
+                </section>
+            </footer>
 
             
 
-            
+            <ul id="post-list" class="archive readmore">
+    <h3>Read more</h3>
 
-            
+    
+    
+    
+        
+        <li>
+            <a href="http://zando.io/post/explaining-zend-module/">Explaining Zend Module Entry<aside class="dates">Sep 5</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://zando.io/post/hello-world-php-7-extension/">Writing a Hello World PHP 7 Extension<aside class="dates">Aug 5</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://zando.io/post/getting-started-with-writing-php-7-extensions/">Getting Started with Writing PHP 7 Extensions<aside class="dates">Aug 5</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://zando.io/post/laravel-5.3-multiple-migration-paths/">Laravel 5.3  - Multiple Migration Paths<aside class="dates">May 25</aside></a>
+        </li>
+        
+   
+</ul>
 
             <footer id="footer">
     
+        <div id="social">
+
+	
+	
+    
+    <a class="symbol" href="https://github.com/alexbowers">
+        github
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/bowersbros">
+        twitterbird
+    </a>
+    
+
+
+</div>
+
+    
     <p class="small">
     
-        © Copyright 2017 <i class="fa fa-heart" aria-hidden="true"></i> 
+        © Copyright 2017 Alex Bowers&#39; Blog
     
-    </p>
-    <p class="small">
-        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="http://nodejh.com">nodejh</a>
     </p>
 </footer>
 
         </section>
 
-        <script src="https://code.jquery.com/jquery-2.2.4.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script src="http://zando.io/js/main.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+<script src="http://zando.io/js/highlight.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
-
-
 
 
 

@@ -3,7 +3,7 @@ title = "Alex Bowers' Blog"
 
 languageCode = "en-gb"
 
-theme = "hugo-theme-cactus-plus"
+theme = "hugo-cactus-theme"
 publishDir = "docs"
 
 [params]
@@ -16,6 +16,8 @@ publishDir = "docs"
   enableGoogleAnalytics = false
   enableBaiduAnalytics = false
 
+  about = ""
+
 [social]
-  twitter-square = "https://twitter.com/bowersbros"
-  github-square = "https://github.com/alexbowers"
+  twitter = "https://twitter.com/bowersbros"
+  github = "https://github.com/alexbowers"

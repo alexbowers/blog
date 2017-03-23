@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Alex Bowers&#39; Blog</title>
+    <link>http://zando.io/post/index.xml</link>
+    <description>Recent content in Posts on Alex Bowers&#39; Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-gb</language>
+    <lastBuildDate>Mon, 05 Sep 2016 22:07:42 +0000</lastBuildDate>
+    <atom:link href="http://zando.io/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Explaining Zend Module Entry</title>
+      <link>http://zando.io/post/explaining-zend-module/</link>
+      <pubDate>Mon, 05 Sep 2016 22:07:42 +0000</pubDate>
+      
+      <guid>http://zando.io/post/explaining-zend-module/</guid>
+      <description>
+
+&lt;h1 id=&#34;contents&#34;&gt;Contents&lt;/h1&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Getting Started&lt;/li&gt;
+&lt;li&gt;Hello World&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Explaining Zend Module Entry&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;In my &lt;a href=&#34;https://zando.io/writing-a-hello-world-php-7-extension/&#34;&gt;last blog post&lt;/a&gt; I skirted past what &lt;code&gt;zend_module_entry&lt;/code&gt; does, and just put the code there. I&amp;rsquo;m going to attempt to explain it with its many &lt;code&gt;NULL&lt;/code&gt; values.&lt;/p&gt;
+
+&lt;p&gt;This is what I put in the Hello World extension:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-c&#34;&gt;zend_module_entry hello_module_entry = {  
+        STANDARD_MODULE_HEADER,
+        PHP_HELLO_EXTNAME,
+        hello_functions,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        PHP_HELLO_VERSION,
+        STANDARD_MODULE_PROPERTIES,
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This structure comes from &lt;a href=&#34;https://github.com/php/php-src/blob/1c295d4a9ac78fcc2f77d6695987598bb7abcb83/Zend/zend_modules.h#L73-L102&#34;&gt;here&lt;/a&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-c&#34;&gt;struct _zend_module_entry {
+    unsigned short size;
+    unsigned int zend_api;
+    unsigned char zend_debug;
+    unsigned char zts;
+    const struct _zend_ini_entry *ini_entry;
+    const struct _zend_module_dep *deps;
+    const char *name;
+    const struct _zend_function_entry *functions;
+    int (*module_startup_func)(INIT_FUNC_ARGS);
+    int (*module_shutdown_func)(SHUTDOWN_FUNC_ARGS);
+    int (*request_startup_func)(INIT_FUNC_ARGS);
+    int (*request_shutdown_func)(SHUTDOWN_FUNC_ARGS);
+    void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS);
+    const char *version;
+    size_t globals_size;
+#ifdef ZTS
+    ts_rsrc_id* globals_id_ptr;
+#else
+    void* globals_ptr;
+#endif
+    void (*globals_ctor)(void *global);
+    void (*globals_dtor)(void *global);
+    int (*post_deactivate_func)(void);
+    int module_started;
+    unsigned char type;
+    void *handle;
+    int module_number;
+    const char *build_id;
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;standard-module-header&#34;&gt;STANDARD_MODULE_HEADER&lt;/h2&gt;
+
+&lt;p&gt;This is a macro that fills in a few of the fields for us.&lt;/p&gt;
+
+&lt;p&gt;There are a few of these macros defined, these are:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/php/php-src/blob/1c295d4a9ac78fcc2f77d6695987598bb7abcb83/Zend/zend_modules.h#L43&#34;&gt;STANDARD_MODULE_HEADER_EX&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/php/php-src/blob/1c295d4a9ac78fcc2f77d6695987598bb7abcb83/Zend/zend_modules.h#L44&#34;&gt;STANDARD_MODULE_HEADER&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;These macros fill the fields size, zend_api, zend_debug, zts and, ini_entry and deps for the non _EX header&lt;/p&gt;
+
+&lt;p&gt;STANDARD_MODULE_HEADER is used when you don&amp;rsquo;t have any dependencies, if you have dependencies then use &lt;code&gt;STANDARD_MODULE_HEADER_EX&lt;/code&gt; instead, and it will leave out a &lt;code&gt;deps&lt;/code&gt; field that you can fill in.&lt;/p&gt;
+
+&lt;h2 id=&#34;php-hello-extname&#34;&gt;PHP_HELLO_EXTNAME&lt;/h2&gt;
+
+&lt;p&gt;This is the name of our extension. We registered this as a constant in &lt;code&gt;hello.h&lt;/code&gt;, you could simply put a string in here. This field is &lt;strong&gt;required&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;hello-functions&#34;&gt;hello_functions&lt;/h2&gt;
+
+&lt;p&gt;This is a reference to the structure of zend_function_entry that we put in&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-c&#34;&gt;zend_function_entry hello_functions[] = {  
+            PHP_FE(hello_world, NULL)
+        PHP_FE_END
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;zend_function_entry&lt;/code&gt; is just a structure containing one or more &lt;a href=&#34;https://github.com/php/php-src/blob/d8507d4f582997ae3efe074f54900af2936835e6/Zend/zend_API.h#L76&#34;&gt;function definitions&lt;/a&gt;, and ending with a &lt;code&gt;PHP_FE_END&lt;/code&gt; &lt;a href=&#34;https://github.com/php/php-src/blob/d8507d4f582997ae3efe074f54900af2936835e6/Zend/zend_API.h#L98&#34;&gt;source&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;the-next-5&#34;&gt;The next 5&lt;/h2&gt;
+
+&lt;p&gt;Are ones you won&amp;rsquo;t touch often, unless you know what you&amp;rsquo;re doing.&lt;/p&gt;
+
+&lt;p&gt;They define, in order,&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Module startup function
+
+&lt;ul&gt;
+&lt;li&gt;Module shutdown function&lt;/li&gt;
+&lt;li&gt;Request startup function&lt;/li&gt;
+&lt;li&gt;Request shutdown function&lt;/li&gt;
+&lt;li&gt;Info Function&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;version-number&#34;&gt;Version Number&lt;/h2&gt;
+
+&lt;p&gt;Next up is the version of the extension. This should be provided as a string, though we are using a constant that we defined in &lt;code&gt;hello.h&lt;/code&gt;. There is also a constant &lt;code&gt;NO_VERSION_YET&lt;/code&gt;, which just defines it as &lt;code&gt;null&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;standard-module-properties&#34;&gt;STANDARD_MODULE_PROPERTIES&lt;/h2&gt;
+
+&lt;p&gt;The rest of the properties are filled in for you by using the &lt;a href=&#34;https://github.com/php/php-src/blob/1c295d4a9ac78fcc2f77d6695987598bb7abcb83/Zend/zend_modules.h#L61&#34;&gt;STANDARD_MODULE_PROPERTIES&lt;/a&gt;. There should be no need for you to fill in these, unless you need to fill in some extension globals, in which case use &lt;code&gt;STANDARD_MODULE_PROPERTIES\_EX&lt;/code&gt;.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Writing a Hello World PHP 7 Extension</title>
+      <link>http://zando.io/post/hello-world-php-7-extension/</link>
+      <pubDate>Fri, 05 Aug 2016 21:26:29 +0000</pubDate>
+      
+      <guid>http://zando.io/post/hello-world-php-7-extension/</guid>
+      <description>
+
+&lt;h1 id=&#34;contents&#34;&gt;Contents&lt;/h1&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Getting Started&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Hello World&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Explaining Zend Module Entry&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&#34;getting-setup&#34;&gt;Getting Setup&lt;/h2&gt;
+
+&lt;p&gt;In the folder &lt;code&gt;/vagrant&lt;/code&gt; you will want to create a new folder with the name of your extension. I will be calling my extension &lt;code&gt;hello&lt;/code&gt; and so my folder will be &lt;code&gt;hello-ext&lt;/code&gt;. This is just convention, and the folder name doesn&amp;rsquo;t actually matter.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$ mkdir /vagrant/hello-ext
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A very basic PHP extension requires 3 files:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;config.m4
+src/hello.c
+src/hello.h
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;config.m4&lt;/code&gt; extension tells PHP some basic information about your extension. The &lt;code&gt;hello.c&lt;/code&gt; and &lt;code&gt;hello.h&lt;/code&gt; files are the actual extension itself.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&#34;actually-writing-the-extension&#34;&gt;Actually writing the extension&lt;/h2&gt;
+
+&lt;h3 id=&#34;test-case-first&#34;&gt;Test case first&lt;/h3&gt;
+
+&lt;p&gt;To check whether this actually works, this is a basic PHP file we using to check:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-php&#34;&gt;&amp;lt;?php
+var_dump(extension_loaded(&#39;hello&#39;));
+
+var_dump(hello_world());
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;At every step of the way through this process, you can re-run this file using &lt;code&gt;php -f /path/to/test/file.php&lt;/code&gt;. If you run this now, you&amp;rsquo;ll see:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$ php -f test.php
+# bool(false)
+
+# Fatal error: Uncaught Error: Call to undefined function hello_world() in /vagrant/test.php:5
+# Stack trace:
+# #0 {main}
+#    thrown in /vagrant/test.php on line 5
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that I hold this file &lt;strong&gt;outside&lt;/strong&gt; of the &lt;code&gt;ext&lt;/code&gt; folder. This file isn&amp;rsquo;t part of our extension. We will deal with proper testing at a later date.&lt;/p&gt;
+
+&lt;h3 id=&#34;config-m4&#34;&gt;config.m4&lt;/h3&gt;
+
+&lt;p&gt;The first thing we should tell PHP about is the argument to enable the &lt;code&gt;hello&lt;/code&gt; extension.&lt;/p&gt;
+
+&lt;p&gt;The syntax for the &lt;code&gt;config.m4&lt;/code&gt; file is based on the &lt;code&gt;GNU autoconf&lt;/code&gt; &lt;a href=&#34;https://www.gnu.org/software/autoconf/manual/autoconf.html&#34;&gt;syntax&lt;/a&gt;. Though, you don&amp;rsquo;t need to know it really. There will be very few lines involved, and i&amp;rsquo;ll do my best to explain them.&lt;/p&gt;
+
+&lt;p&gt;Comments can be left in the &lt;code&gt;config.m4&lt;/code&gt; file using &lt;code&gt;dnl&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-autoconf&#34;&gt;dnl Tell PHP about the argument to enable the hello extension
+
+PHP_ARG_ENABLE(hello, Whether to enable the hello world extension, [ --enable-hello   Enable hello world])
+
+if test &amp;quot;$PHP_HELLO&amp;quot; != &amp;quot;no&amp;quot;; then
+    PHP_NEW_EXTENSION(hello, src/hello.c, $ext_shared)
+fi
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;dnl&lt;/code&gt; stands for &lt;code&gt;Discard to Next Line&lt;/code&gt; &lt;sup&gt;&lt;a href=&#34;http://stackoverflow.com/questions/3371239/autoconf-dnl-vs#comment48017868_3377708&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;, including the new line at the end of the line.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Breaking &lt;code&gt;PHP_ARG_ENABLE(hello, Whether to enable the hello world extension, [ --enable-hello   Enable hello world])&lt;/code&gt; down:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;PHP_ARG_ENABLE&lt;/code&gt; - Provides &lt;code&gt;configure&lt;/code&gt; with the options and help text seen when running &lt;code&gt;./configure --help&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;There is also a &lt;code&gt;PHP_ARG_WITH&lt;/code&gt;, and either &lt;code&gt;ENABLE&lt;/code&gt; or &lt;code&gt;WITH&lt;/code&gt; should be provided. The difference there is how &lt;code&gt;configure&lt;/code&gt; gets ran, either &lt;code&gt;--with-*&lt;/code&gt; or &lt;code&gt;--enable-*&lt;/code&gt;.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;&amp;ndash;enable-SOMETHING&lt;/strong&gt; is used for extensions with zero dependencies&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;&amp;ndash;with-SOMETHING&lt;/strong&gt; is used for extensions with dependencies (e.g. it&amp;rsquo;s &amp;ndash;enable-pdo, but &amp;ndash;with-pdo-mysql as the latter may depend on libmysqlclient)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;em&gt;Thanks to /u/dshafik for clarification on this&lt;/em&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Every extension should provide at least one or the other with the extension name, so that users can choose whether or not to build the extension into PHP.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;By convention, &lt;code&gt;PHP_ARG_WITH()&lt;/code&gt; is used for an option which takes a parameter, such as the location of a library or program required by an extension, while &lt;code&gt;PHP_ARG_ENABLE()&lt;/code&gt; is used for an option which represents a simple flag.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://php.net/manual/en/internals2.buildsys.configunix.php&#34;&gt;source&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;hello&lt;/code&gt; is just the name of our extension.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;Whether to enable the hello world extension&lt;/code&gt; Not entirely sure what this is for to be honest.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;[ --enable-hello   Enable hello world]&lt;/code&gt; this determines the output for &lt;code&gt;configure --help&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;It will end up looking something like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://i.imgur.com/ygZBnfD.png&#34; alt=&#34;Image&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;being what was inside the square brackets.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Then next bit is literally just a basic &lt;code&gt;if&lt;/code&gt; check to determine whether or not the the extension is enabled. By default, it will be for us.&lt;/p&gt;
+
+&lt;p&gt;Now we need to register the extension.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;PHP_NEW_EXTENSION(hello, src/hello.c, $ext_shared)&lt;/code&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;The first parameter is the name of the extension.&lt;/p&gt;
+
+&lt;p&gt;The second parameter is the list of all source files which are part of the extension.&lt;/p&gt;
+
+&lt;p&gt;The third parameter should always be $ext_shared, a value which was determined by configure.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Taken, and adapted from the woefully outdated &lt;a href=&#34;http://php.net/manual/en/internals2.buildsys.configunix.php&#34;&gt;php guide&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;There are more parameters, but so far we don&amp;rsquo;t need them, so we will leave them for a different day.&lt;/p&gt;
+
+&lt;p&gt;Now to the actual extension itself.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h3 id=&#34;src-hello-h&#34;&gt;src/hello.h&lt;/h3&gt;
+
+&lt;p&gt;This file is quite basic:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-c&#34;&gt;#define PHP_HELLO_EXTNAME &amp;quot;hello&amp;quot;
+#define PHP_HELLO_VERSION &amp;quot;0.0.1&amp;quot;
+
+PHP_FUNCTION(hello_world);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We are defining two directives, what this allows us to do is use &lt;code&gt;PHP_HELLO_EXTNAME&lt;/code&gt; in place of the actual string &lt;code&gt;hello&lt;/code&gt; throughout.&lt;/p&gt;
+
+&lt;p&gt;This is common practice, so whilst not necessary strictly in this use case, it is a good habit to have.&lt;/p&gt;
+
+&lt;p&gt;The first interesting line is &lt;code&gt;PHP_FUNCTION(hello_world);&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;This is where we define the header for our function.&lt;/p&gt;
+
+&lt;p&gt;The body of the function will go within our &lt;code&gt;hello.c&lt;/code&gt; file.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h3 id=&#34;src-hello-c&#34;&gt;src/hello.c&lt;/h3&gt;
+
+&lt;p&gt;This is where things get a little more complicated now.&lt;/p&gt;
+
+&lt;p&gt;So i&amp;rsquo;ll give you the full file, and then break it down a little:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-c&#34;&gt;#include &amp;lt;php.h&amp;gt;
+#include &amp;quot;hello.h&amp;quot;
+
+zend_function_entry hello_functions[] = {
+            PHP_FE(hello_world, NULL)
+        PHP_FE_END
+};
+
+zend_module_entry hello_module_entry = {
+            STANDARD_MODULE_HEADER,
+        PHP_HELLO_EXTNAME,
+        hello_functions,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        PHP_HELLO_VERSION,
+        STANDARD_MODULE_PROPERTIES,
+};
+
+ZEND_GET_MODULE(hello);
+
+PHP_FUNCTION(hello_world) {
+            php_printf(&amp;quot;Hello world\
+&amp;quot;);
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Pasting this in to your file, and then going to the terminal and running the following commands will allow this to work.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$ cd /vagrant/hello-ext
+$ phpize
+$ ./configure
+$ make
+$ sudo make install
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The next thing to do is add the extension into your &lt;code&gt;php.ini&lt;/code&gt; file.&lt;/p&gt;
+
+&lt;p&gt;This will look like so:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-ini&#34;&gt;extension=hello.so
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now, go back to your test file and run it again.&lt;/p&gt;
+
+&lt;p&gt;You should see something like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$ php -f test.php
+bool(true)
+Hello world
+NULL
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Note: Fixed typo with response above, thanks to /u/phisch90&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Success.&lt;/p&gt;
+
+&lt;p&gt;The reason for the hanging &lt;code&gt;NULL&lt;/code&gt; is because we are using the &lt;code&gt;printf&lt;/code&gt; function, rather than returning the value.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Getting Started with Writing PHP 7 Extensions</title>
+      <link>http://zando.io/post/getting-started-with-writing-php-7-extensions/</link>
+      <pubDate>Fri, 05 Aug 2016 20:35:54 +0000</pubDate>
+      
+      <guid>http://zando.io/post/getting-started-with-writing-php-7-extensions/</guid>
+      <description>
+
+&lt;p&gt;This blog post is the first in a series of PHP 7 extension building.&lt;/p&gt;
+
+&lt;p&gt;You will be joining me on my journey of discovering how extensions are built. I have never written C code before, or looked deeply into PHP internals. I will make mistakes, and I will try my best to correct them as we go along, but if you notice anything, please email me and i&amp;rsquo;ll fix it as soon as possible.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h1 id=&#34;contents&#34;&gt;Contents&lt;/h1&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Getting Started&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Hello World&lt;/li&gt;
+&lt;li&gt;Explaining Zend Module Entry&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&#34;install-vagrant&#34;&gt;Install Vagrant&lt;/h2&gt;
+
+&lt;p&gt;The first thing we have to do is install PHP 7 as a development version. The best way to do this is to use a &lt;a href=&#34;https://www.vagrantup.com/&#34;&gt;vagrant&lt;/a&gt; box  built by &lt;a href=&#34;https://en.wikipedia.org/wiki/Rasmus_Lerdorf&#34;&gt;Rasmus Lerdorf&lt;/a&gt; - &lt;a href=&#34;https://atlas.hashicorp.com/rasmus/boxes/php7dev&#34;&gt;rasmus/php7dev&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I will be creating a folder in &lt;code&gt;~/php-extensions/&lt;/code&gt; for each of the extensions created.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&#34;install-vagrant-box&#34;&gt;Install Vagrant Box&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$ vagrant init rasmus/php7dev; vagrant up --provider virtualbox
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Once that has completed, you will want to &lt;code&gt;vagrant ssh&lt;/code&gt; into the box.&lt;/p&gt;
+
+&lt;p&gt;The rest of the series of blog posts will assume we are within the vagrant box.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&#34;check-everything-is-ready&#34;&gt;Check everything is ready&lt;/h2&gt;
+
+&lt;p&gt;Everything should be ready, but to check type these commands in and you should see something like the below:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$ which phpize
+# /usr/local/bin/phpize
+$ php --version
+# PHP 7.0.11-dev (cli) (built: Aug  3 2016 23:41:41) ( NTS DEBUG )
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you see it all as above then we are ready to continue.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&#34;ide-text-editor&#34;&gt;IDE / Text Editor&lt;/h2&gt;
+
+&lt;p&gt;For PHP extensions you do not need anything special in terms of an IDE, you will be absolutely fine using Sublime Text, Atom, etc. I will be using &lt;a href=&#34;https://www.jetbrains.com/clion/&#34;&gt;CLion&lt;/a&gt; by &lt;a href=&#34;https://www.jetbrains.com&#34;&gt;JetBrains&lt;/a&gt;.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Laravel 5.3  - Multiple Migration Paths</title>
+      <link>http://zando.io/post/laravel-5.3-multiple-migration-paths/</link>
+      <pubDate>Wed, 25 May 2016 21:21:08 +0000</pubDate>
+      
+      <guid>http://zando.io/post/laravel-5.3-multiple-migration-paths/</guid>
+      <description>
+
+&lt;p&gt;In Laravel 5.3+ there is a new feature that allows for multiple migration paths.&lt;/p&gt;
+
+&lt;h2 id=&#34;why-should-i-care&#34;&gt;Why should I care?&lt;/h2&gt;
+
+&lt;p&gt;You may not think its that big a deal, but it will help many packages significantly.&lt;/p&gt;
+
+&lt;p&gt;A required step previously was to have a publication step, or a copy paste step for the migrations from &lt;code&gt;vendor/package/database/migrations&lt;/code&gt; to &lt;code&gt;database/migrations&lt;/code&gt;.
+This new feature allows the migrations to stay where they are, and not clutter up your migrations folder.&lt;/p&gt;
+
+&lt;p&gt;This is useful because when a package gets a new version, you don&amp;rsquo;t want to possibly have to copy their migrations over again, you want to be able to just run &lt;code&gt;php artisan migrate&lt;/code&gt; and have it work.&lt;/p&gt;
+
+&lt;p&gt;In this new system it will.&lt;/p&gt;
+
+&lt;h2 id=&#34;okay-that-sounds-great-how-do-we-use-it&#34;&gt;Okay that sounds great. How do we use it?&lt;/h2&gt;
+
+&lt;p&gt;As soon as you are on Laravel 5.3, it will be enabled for you by default. All you have to do is in a Service Provider (for example, a MigrationsServiceProvider) &lt;code&gt;boot&lt;/code&gt; method, is call &lt;code&gt;$this-&amp;gt;loadMigrationsFrom(&#39;path/to/migrations/folder&#39;)&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Any subsequent calls to &lt;code&gt;php artisan migrate&lt;/code&gt; will just work.&lt;/p&gt;
+
+&lt;h2 id=&#34;erm-i-don-t-know-do-i-have-to-do-this&#34;&gt;Erm, I don&amp;rsquo;t know. Do I have to do this?&lt;/h2&gt;
+
+&lt;p&gt;If you do not wish to use this feature, nothing has changed. You can still copy migrations from the package to your database migrations folder if you wish to.
+And you do not have to add your migration path in a service provider, that&amp;rsquo;s done for you.&lt;/p&gt;
+
+&lt;h2 id=&#34;what-should-use-this&#34;&gt;What should use this?&lt;/h2&gt;
+
+&lt;p&gt;This should be used by any system that wants to use it.&lt;/p&gt;
+
+&lt;p&gt;If any package you use requires you to pull in their migration files from a specific location, then this is a prime candidate for this to be used.&lt;/p&gt;
+
+&lt;p&gt;If your aiming for a modular design.
+This is a must to keep the core separate from each module.
+Now, your modules are just composer directories living in their own space, and there is no bleeding across the two.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

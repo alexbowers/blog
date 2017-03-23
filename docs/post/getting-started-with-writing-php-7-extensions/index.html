@@ -1,0 +1,251 @@
+    <!DOCTYPE html>
+<html lang="en-gb">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="Alex Bowers&#39; Blog">
+		
+		<meta name="generator" content="Hugo 0.19" />
+		<title>Getting Started with Writing PHP 7 Extensions &middot; Alex Bowers&#39; Blog</title>
+		<link rel="shortcut icon" href="http://zando.io/images/favicon.ico">
+		<link rel="stylesheet" href="http://zando.io/css/style.css">
+		<link rel="stylesheet" href="http://zando.io/css/highlight.css">
+		
+
+		
+		<link rel="stylesheet" href="http://zando.io/css/monosocialiconsfont.css">
+		
+
+		
+
+		<meta property="og:title" content="Getting Started with Writing PHP 7 Extensions" />
+<meta property="og:description" content="This blog post is the first in a series of PHP 7 extension building.
+You will be joining me on my journey of discovering how extensions are built. I have never written C code before, or looked deeply into PHP internals. I will make mistakes, and I will try my best to correct them as we go along, but if you notice anything, please email me and i&rsquo;ll fix it as soon as possible." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://zando.io/post/getting-started-with-writing-php-7-extensions/" />
+
+
+
+<meta property="article:published_time" content="2016-08-05T20:35:54&#43;00:00"/>
+<meta property="article:modified_time" content="2016-08-05T20:35:54&#43;00:00"/>
+
+
+
+
+
+
+
+
+
+
+
+	    
+	    
+<meta itemprop="name" content="Getting Started with Writing PHP 7 Extensions">
+<meta itemprop="description" content="This blog post is the first in a series of PHP 7 extension building.
+You will be joining me on my journey of discovering how extensions are built. I have never written C code before, or looked deeply into PHP internals. I will make mistakes, and I will try my best to correct them as we go along, but if you notice anything, please email me and i&rsquo;ll fix it as soon as possible.">
+
+
+<meta itemprop="dateModified" content="2016-08-05T20:35:54&#43;00:00" />
+<meta itemprop="wordCount" content="264">
+
+
+
+<meta itemprop="keywords" content="" />
+
+	    
+
+  <meta name="twitter:card" content="summary"/>
+
+
+
+<meta name="twitter:text:title" content="Getting Started with Writing PHP 7 Extensions"/>
+<meta name="twitter:title" content="Getting Started with Writing PHP 7 Extensions"/>
+<meta name="twitter:description" content="This blog post is the first in a series of PHP 7 extension building.
+You will be joining me on my journey of discovering how extensions are built. I have never written C code before, or looked deeply into PHP internals. I will make mistakes, and I will try my best to correct them as we go along, but if you notice anything, please email me and i&rsquo;ll fix it as soon as possible."/>
+<meta name="twitter:site" content="@https://twitter.com/bowersbros"/>
+
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='http://zando.io/'> <span class="arrow">←</span>Home</a>
+	
+
+	
+		<a href='http://zando.io/about'>About</a>
+	
+
+	
+</nav>
+
+        <section id="wrapper">
+            <article class="post">
+                <header>
+                    <h1>Getting Started with Writing PHP 7 Extensions</h1>
+                    <h2 class="headline">
+                    August 5, 2016 
+                    <br>
+                    
+                    </h2>
+                </header>
+                <section id="post-body">
+                    
+
+<p>This blog post is the first in a series of PHP 7 extension building.</p>
+
+<p>You will be joining me on my journey of discovering how extensions are built. I have never written C code before, or looked deeply into PHP internals. I will make mistakes, and I will try my best to correct them as we go along, but if you notice anything, please email me and i&rsquo;ll fix it as soon as possible.</p>
+
+<hr />
+
+<h1 id="contents">Contents</h1>
+
+<ol>
+<li><strong>Getting Started</strong></li>
+<li>Hello World</li>
+<li>Explaining Zend Module Entry</li>
+</ol>
+
+<hr />
+
+<h2 id="install-vagrant">Install Vagrant</h2>
+
+<p>The first thing we have to do is install PHP 7 as a development version. The best way to do this is to use a <a href="https://www.vagrantup.com/">vagrant</a> box  built by <a href="https://en.wikipedia.org/wiki/Rasmus_Lerdorf">Rasmus Lerdorf</a> - <a href="https://atlas.hashicorp.com/rasmus/boxes/php7dev">rasmus/php7dev</a>.</p>
+
+<p>I will be creating a folder in <code>~/php-extensions/</code> for each of the extensions created.</p>
+
+<hr />
+
+<h2 id="install-vagrant-box">Install Vagrant Box</h2>
+
+<pre><code class="language-bash">$ vagrant init rasmus/php7dev; vagrant up --provider virtualbox
+</code></pre>
+
+<p>Once that has completed, you will want to <code>vagrant ssh</code> into the box.</p>
+
+<p>The rest of the series of blog posts will assume we are within the vagrant box.</p>
+
+<hr />
+
+<h2 id="check-everything-is-ready">Check everything is ready</h2>
+
+<p>Everything should be ready, but to check type these commands in and you should see something like the below:</p>
+
+<pre><code class="language-bash">$ which phpize
+# /usr/local/bin/phpize
+$ php --version
+# PHP 7.0.11-dev (cli) (built: Aug  3 2016 23:41:41) ( NTS DEBUG )
+</code></pre>
+
+<p>If you see it all as above then we are ready to continue.</p>
+
+<hr />
+
+<h2 id="ide-text-editor">IDE / Text Editor</h2>
+
+<p>For PHP extensions you do not need anything special in terms of an IDE, you will be absolutely fine using Sublime Text, Atom, etc. I will be using <a href="https://www.jetbrains.com/clion/">CLion</a> by <a href="https://www.jetbrains.com">JetBrains</a>.</p>
+
+                </section>
+            </article>
+            <footer id="post-meta" class="clearfix">
+                <a href="https://twitter.com/bowersbros">
+                        <img class="avatar" src="http://zando.io/images/avatar.png">
+                        <div>
+                            <span class="dark">Alex Bowers&#39; Blog</span>
+                            <span></span>
+                        </div>
+                    </a>
+                <section id="sharing">
+                    <a class="twitter" href="https://twitter.com/intent/tweet?text=http%3a%2f%2fzando.io%2fpost%2fgetting-started-with-writing-php-7-extensions%2f - Getting%20Started%20with%20Writing%20PHP%207%20Extensions by @bowersbros"><span class="icon-twitter"> Tweet</span></a>
+
+<a class="facebook" href="#" onclick="
+    window.open(
+      'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+      'facebook-share-dialog',
+      'width=626,height=436');
+    return false;"><span class="icon-facebook-rect"> Share</span>
+</a>
+
+                </section>
+            </footer>
+
+            
+
+            <ul id="post-list" class="archive readmore">
+    <h3>Read more</h3>
+
+    
+    
+    
+        
+        <li>
+            <a href="http://zando.io/post/explaining-zend-module/">Explaining Zend Module Entry<aside class="dates">Sep 5</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://zando.io/post/hello-world-php-7-extension/">Writing a Hello World PHP 7 Extension<aside class="dates">Aug 5</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://zando.io/post/getting-started-with-writing-php-7-extensions/">Getting Started with Writing PHP 7 Extensions<aside class="dates">Aug 5</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://zando.io/post/laravel-5.3-multiple-migration-paths/">Laravel 5.3  - Multiple Migration Paths<aside class="dates">May 25</aside></a>
+        </li>
+        
+   
+</ul>
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    
+    <a class="symbol" href="https://github.com/alexbowers">
+        github
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/bowersbros">
+        twitterbird
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+        © Copyright 2017 Alex Bowers&#39; Blog
+    
+    </p>
+</footer>
+
+        </section>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="http://zando.io/js/main.js"></script>
+<script src="http://zando.io/js/highlight.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+    </body>
+</html>

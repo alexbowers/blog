@@ -1,0 +1,322 @@
+    <!DOCTYPE html>
+<html lang="en-gb">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="Alex Bowers&#39; Blog">
+		
+		<meta name="generator" content="Hugo 0.19" />
+		<title>Explaining Zend Module Entry &middot; Alex Bowers&#39; Blog</title>
+		<link rel="shortcut icon" href="http://zando.io/images/favicon.ico">
+		<link rel="stylesheet" href="http://zando.io/css/style.css">
+		<link rel="stylesheet" href="http://zando.io/css/highlight.css">
+		
+
+		
+		<link rel="stylesheet" href="http://zando.io/css/monosocialiconsfont.css">
+		
+
+		
+
+		<meta property="og:title" content="Explaining Zend Module Entry" />
+<meta property="og:description" content="Contents  Getting Started Hello World Explaining Zend Module Entry  In my last blog post I skirted past what zend_module_entry does, and just put the code there. I&rsquo;m going to attempt to explain it with its many NULL values.
+This is what I put in the Hello World extension:
+zend_module_entry hello_module_entry = { STANDARD_MODULE_HEADER, PHP_HELLO_EXTNAME, hello_functions, NULL, NULL, NULL, NULL, NULL, PHP_HELLO_VERSION, STANDARD_MODULE_PROPERTIES, };  This structure comes from here:" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://zando.io/post/explaining-zend-module/" />
+
+
+
+<meta property="article:published_time" content="2016-09-05T22:07:42&#43;00:00"/>
+<meta property="article:modified_time" content="2016-09-05T22:07:42&#43;00:00"/>
+
+
+
+
+
+
+
+
+
+
+
+	    
+	    
+<meta itemprop="name" content="Explaining Zend Module Entry">
+<meta itemprop="description" content="Contents  Getting Started Hello World Explaining Zend Module Entry  In my last blog post I skirted past what zend_module_entry does, and just put the code there. I&rsquo;m going to attempt to explain it with its many NULL values.
+This is what I put in the Hello World extension:
+zend_module_entry hello_module_entry = { STANDARD_MODULE_HEADER, PHP_HELLO_EXTNAME, hello_functions, NULL, NULL, NULL, NULL, NULL, PHP_HELLO_VERSION, STANDARD_MODULE_PROPERTIES, };  This structure comes from here:">
+
+
+<meta itemprop="dateModified" content="2016-09-05T22:07:42&#43;00:00" />
+<meta itemprop="wordCount" content="397">
+
+
+
+<meta itemprop="keywords" content="" />
+
+	    
+
+  <meta name="twitter:card" content="summary"/>
+
+
+
+<meta name="twitter:text:title" content="Explaining Zend Module Entry"/>
+<meta name="twitter:title" content="Explaining Zend Module Entry"/>
+<meta name="twitter:description" content="Contents  Getting Started Hello World Explaining Zend Module Entry  In my last blog post I skirted past what zend_module_entry does, and just put the code there. I&rsquo;m going to attempt to explain it with its many NULL values.
+This is what I put in the Hello World extension:
+zend_module_entry hello_module_entry = { STANDARD_MODULE_HEADER, PHP_HELLO_EXTNAME, hello_functions, NULL, NULL, NULL, NULL, NULL, PHP_HELLO_VERSION, STANDARD_MODULE_PROPERTIES, };  This structure comes from here:"/>
+<meta name="twitter:site" content="@https://twitter.com/bowersbros"/>
+
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='http://zando.io/'> <span class="arrow">←</span>Home</a>
+	
+
+	
+		<a href='http://zando.io/about'>About</a>
+	
+
+	
+</nav>
+
+        <section id="wrapper">
+            <article class="post">
+                <header>
+                    <h1>Explaining Zend Module Entry</h1>
+                    <h2 class="headline">
+                    September 5, 2016 
+                    <br>
+                    
+                    </h2>
+                </header>
+                <section id="post-body">
+                    
+
+<h1 id="contents">Contents</h1>
+
+<ol>
+<li>Getting Started</li>
+<li>Hello World</li>
+<li><strong>Explaining Zend Module Entry</strong></li>
+</ol>
+
+<hr />
+
+<p>In my <a href="https://zando.io/writing-a-hello-world-php-7-extension/">last blog post</a> I skirted past what <code>zend_module_entry</code> does, and just put the code there. I&rsquo;m going to attempt to explain it with its many <code>NULL</code> values.</p>
+
+<p>This is what I put in the Hello World extension:</p>
+
+<pre><code class="language-c">zend_module_entry hello_module_entry = {  
+        STANDARD_MODULE_HEADER,
+        PHP_HELLO_EXTNAME,
+        hello_functions,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        PHP_HELLO_VERSION,
+        STANDARD_MODULE_PROPERTIES,
+};
+</code></pre>
+
+<p>This structure comes from <a href="https://github.com/php/php-src/blob/1c295d4a9ac78fcc2f77d6695987598bb7abcb83/Zend/zend_modules.h#L73-L102">here</a>:</p>
+
+<pre><code class="language-c">struct _zend_module_entry {
+    unsigned short size;
+    unsigned int zend_api;
+    unsigned char zend_debug;
+    unsigned char zts;
+    const struct _zend_ini_entry *ini_entry;
+    const struct _zend_module_dep *deps;
+    const char *name;
+    const struct _zend_function_entry *functions;
+    int (*module_startup_func)(INIT_FUNC_ARGS);
+    int (*module_shutdown_func)(SHUTDOWN_FUNC_ARGS);
+    int (*request_startup_func)(INIT_FUNC_ARGS);
+    int (*request_shutdown_func)(SHUTDOWN_FUNC_ARGS);
+    void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS);
+    const char *version;
+    size_t globals_size;
+#ifdef ZTS
+    ts_rsrc_id* globals_id_ptr;
+#else
+    void* globals_ptr;
+#endif
+    void (*globals_ctor)(void *global);
+    void (*globals_dtor)(void *global);
+    int (*post_deactivate_func)(void);
+    int module_started;
+    unsigned char type;
+    void *handle;
+    int module_number;
+    const char *build_id;
+};
+</code></pre>
+
+<h2 id="standard-module-header">STANDARD_MODULE_HEADER</h2>
+
+<p>This is a macro that fills in a few of the fields for us.</p>
+
+<p>There are a few of these macros defined, these are:</p>
+
+<ul>
+<li><a href="https://github.com/php/php-src/blob/1c295d4a9ac78fcc2f77d6695987598bb7abcb83/Zend/zend_modules.h#L43">STANDARD_MODULE_HEADER_EX</a>
+
+<ul>
+<li><a href="https://github.com/php/php-src/blob/1c295d4a9ac78fcc2f77d6695987598bb7abcb83/Zend/zend_modules.h#L44">STANDARD_MODULE_HEADER</a></li>
+</ul></li>
+</ul>
+
+<p>These macros fill the fields size, zend_api, zend_debug, zts and, ini_entry and deps for the non _EX header</p>
+
+<p>STANDARD_MODULE_HEADER is used when you don&rsquo;t have any dependencies, if you have dependencies then use <code>STANDARD_MODULE_HEADER_EX</code> instead, and it will leave out a <code>deps</code> field that you can fill in.</p>
+
+<h2 id="php-hello-extname">PHP_HELLO_EXTNAME</h2>
+
+<p>This is the name of our extension. We registered this as a constant in <code>hello.h</code>, you could simply put a string in here. This field is <strong>required</strong>.</p>
+
+<h2 id="hello-functions">hello_functions</h2>
+
+<p>This is a reference to the structure of zend_function_entry that we put in</p>
+
+<pre><code class="language-c">zend_function_entry hello_functions[] = {  
+            PHP_FE(hello_world, NULL)
+        PHP_FE_END
+};
+</code></pre>
+
+<p><code>zend_function_entry</code> is just a structure containing one or more <a href="https://github.com/php/php-src/blob/d8507d4f582997ae3efe074f54900af2936835e6/Zend/zend_API.h#L76">function definitions</a>, and ending with a <code>PHP_FE_END</code> <a href="https://github.com/php/php-src/blob/d8507d4f582997ae3efe074f54900af2936835e6/Zend/zend_API.h#L98">source</a>.</p>
+
+<h2 id="the-next-5">The next 5</h2>
+
+<p>Are ones you won&rsquo;t touch often, unless you know what you&rsquo;re doing.</p>
+
+<p>They define, in order,</p>
+
+<ul>
+<li>Module startup function
+
+<ul>
+<li>Module shutdown function</li>
+<li>Request startup function</li>
+<li>Request shutdown function</li>
+<li>Info Function</li>
+</ul></li>
+</ul>
+
+<h2 id="version-number">Version Number</h2>
+
+<p>Next up is the version of the extension. This should be provided as a string, though we are using a constant that we defined in <code>hello.h</code>. There is also a constant <code>NO_VERSION_YET</code>, which just defines it as <code>null</code>.</p>
+
+<h2 id="standard-module-properties">STANDARD_MODULE_PROPERTIES</h2>
+
+<p>The rest of the properties are filled in for you by using the <a href="https://github.com/php/php-src/blob/1c295d4a9ac78fcc2f77d6695987598bb7abcb83/Zend/zend_modules.h#L61">STANDARD_MODULE_PROPERTIES</a>. There should be no need for you to fill in these, unless you need to fill in some extension globals, in which case use <code>STANDARD_MODULE_PROPERTIES\_EX</code>.</p>
+
+                </section>
+            </article>
+            <footer id="post-meta" class="clearfix">
+                <a href="https://twitter.com/bowersbros">
+                        <img class="avatar" src="http://zando.io/images/avatar.png">
+                        <div>
+                            <span class="dark">Alex Bowers&#39; Blog</span>
+                            <span></span>
+                        </div>
+                    </a>
+                <section id="sharing">
+                    <a class="twitter" href="https://twitter.com/intent/tweet?text=http%3a%2f%2fzando.io%2fpost%2fexplaining-zend-module%2f - Explaining%20Zend%20Module%20Entry by @bowersbros"><span class="icon-twitter"> Tweet</span></a>
+
+<a class="facebook" href="#" onclick="
+    window.open(
+      'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+      'facebook-share-dialog',
+      'width=626,height=436');
+    return false;"><span class="icon-facebook-rect"> Share</span>
+</a>
+
+                </section>
+            </footer>
+
+            
+
+            <ul id="post-list" class="archive readmore">
+    <h3>Read more</h3>
+
+    
+    
+    
+        
+        <li>
+            <a href="http://zando.io/post/explaining-zend-module/">Explaining Zend Module Entry<aside class="dates">Sep 5</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://zando.io/post/hello-world-php-7-extension/">Writing a Hello World PHP 7 Extension<aside class="dates">Aug 5</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://zando.io/post/getting-started-with-writing-php-7-extensions/">Getting Started with Writing PHP 7 Extensions<aside class="dates">Aug 5</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="http://zando.io/post/laravel-5.3-multiple-migration-paths/">Laravel 5.3  - Multiple Migration Paths<aside class="dates">May 25</aside></a>
+        </li>
+        
+   
+</ul>
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    
+    <a class="symbol" href="https://github.com/alexbowers">
+        github
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/bowersbros">
+        twitterbird
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+        © Copyright 2017 Alex Bowers&#39; Blog
+    
+    </p>
+</footer>
+
+        </section>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="http://zando.io/js/main.js"></script>
+<script src="http://zando.io/js/highlight.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+    </body>
+</html>

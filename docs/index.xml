@@ -6,8 +6,17 @@
     <description>Recent content on Alex Bowers&#39; Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-gb</language>
-    <lastBuildDate>Mon, 05 Sep 2016 22:07:42 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 23 Mar 2017 02:20:06 +0000</lastBuildDate>
     <atom:link href="http://zando.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title></title>
+      <link>http://zando.io/post/lets-encrypt-to-pem-using-rust/</link>
+      <pubDate>Thu, 23 Mar 2017 02:20:06 +0000</pubDate>
+      
+      <guid>http://zando.io/post/lets-encrypt-to-pem-using-rust/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Explaining Zend Module Entry</title>

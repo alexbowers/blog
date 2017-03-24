@@ -6,6 +6,8 @@ languageCode = "en-gb"
 theme = "hugo-cactus-theme"
 publishDir = "docs"
 
+googleAnalytics = "UA-78319221-1"
+
 [params]
   name = "Alex Bowers' Blog"
   twitter = "bowersbros"

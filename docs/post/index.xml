@@ -2,19 +2,19 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on Alex Bowers&#39; Blog</title>
-    <link>http://zando.io/post/index.xml</link>
+    <link>https://zando.io/post/index.xml</link>
     <description>Recent content in Posts on Alex Bowers&#39; Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-gb</language>
     <lastBuildDate>Fri, 24 Mar 2017 21:35:40 +0000</lastBuildDate>
-    <atom:link href="http://zando.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://zando.io/post/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Using HA Proxy for SaaS systems - Custom Domains</title>
-      <link>http://zando.io/post/haproxy-saas-custom-domains/</link>
+      <link>https://zando.io/post/haproxy-saas-custom-domains/</link>
       <pubDate>Fri, 24 Mar 2017 21:35:40 +0000</pubDate>
       
-      <guid>http://zando.io/post/haproxy-saas-custom-domains/</guid>
+      <guid>https://zando.io/post/haproxy-saas-custom-domains/</guid>
       <description>&lt;p&gt;A common problem with setting up a SaaS system is how to manage the customers on a custom domain.&lt;/p&gt;
 
 &lt;p&gt;Its easy when everybody enters your system through &lt;code&gt;example.com&lt;/code&gt;, and even &lt;code&gt;account-name.example.com&lt;/code&gt; wildcards, but what if your system offers the ability to have a custom domain such as &lt;code&gt;zando.io&lt;/code&gt;.&lt;/p&gt;
@@ -237,10 +237,10 @@ backend core
     
     <item>
       <title>Explaining Zend Module Entry</title>
-      <link>http://zando.io/post/explaining-zend-module/</link>
+      <link>https://zando.io/post/explaining-zend-module/</link>
       <pubDate>Mon, 05 Sep 2016 22:07:42 +0000</pubDate>
       
-      <guid>http://zando.io/post/explaining-zend-module/</guid>
+      <guid>https://zando.io/post/explaining-zend-module/</guid>
       <description>
 
 &lt;h1 id=&#34;contents&#34;&gt;Contents&lt;/h1&gt;
@@ -368,10 +368,10 @@ backend core
     
     <item>
       <title>Writing a Hello World PHP 7 Extension</title>
-      <link>http://zando.io/post/hello-world-php-7-extension/</link>
+      <link>https://zando.io/post/hello-world-php-7-extension/</link>
       <pubDate>Fri, 05 Aug 2016 21:26:29 +0000</pubDate>
       
-      <guid>http://zando.io/post/hello-world-php-7-extension/</guid>
+      <guid>https://zando.io/post/hello-world-php-7-extension/</guid>
       <description>
 
 &lt;h1 id=&#34;contents&#34;&gt;Contents&lt;/h1&gt;
@@ -606,10 +606,10 @@ NULL
     
     <item>
       <title>Getting Started with Writing PHP 7 Extensions</title>
-      <link>http://zando.io/post/getting-started-with-writing-php-7-extensions/</link>
+      <link>https://zando.io/post/getting-started-with-writing-php-7-extensions/</link>
       <pubDate>Fri, 05 Aug 2016 20:35:54 +0000</pubDate>
       
-      <guid>http://zando.io/post/getting-started-with-writing-php-7-extensions/</guid>
+      <guid>https://zando.io/post/getting-started-with-writing-php-7-extensions/</guid>
       <description>
 
 &lt;p&gt;This blog post is the first in a series of PHP 7 extension building.&lt;/p&gt;
@@ -669,10 +669,10 @@ $ php --version
     
     <item>
       <title>Laravel 5.3  - Multiple Migration Paths</title>
-      <link>http://zando.io/post/laravel-5.3-multiple-migration-paths/</link>
+      <link>https://zando.io/post/laravel-5.3-multiple-migration-paths/</link>
       <pubDate>Wed, 25 May 2016 21:21:08 +0000</pubDate>
       
-      <guid>http://zando.io/post/laravel-5.3-multiple-migration-paths/</guid>
+      <guid>https://zando.io/post/laravel-5.3-multiple-migration-paths/</guid>
       <description>
 
 &lt;p&gt;In Laravel 5.3+ there is a new feature that allows for multiple migration paths.&lt;/p&gt;

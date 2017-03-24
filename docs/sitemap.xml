@@ -2,38 +2,38 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://zando.io/post/haproxy-saas-custom-domains/</loc>
+    <loc>https://zando.io/post/haproxy-saas-custom-domains/</loc>
     <lastmod>2017-03-24T21:35:40+00:00</lastmod>
   </url>
   
   <url>
-    <loc>http://zando.io/post/explaining-zend-module/</loc>
+    <loc>https://zando.io/post/explaining-zend-module/</loc>
     <lastmod>2016-09-05T22:07:42+00:00</lastmod>
   </url>
   
   <url>
-    <loc>http://zando.io/post/hello-world-php-7-extension/</loc>
+    <loc>https://zando.io/post/hello-world-php-7-extension/</loc>
     <lastmod>2016-08-05T21:26:29+00:00</lastmod>
   </url>
   
   <url>
-    <loc>http://zando.io/post/getting-started-with-writing-php-7-extensions/</loc>
+    <loc>https://zando.io/post/getting-started-with-writing-php-7-extensions/</loc>
     <lastmod>2016-08-05T20:35:54+00:00</lastmod>
   </url>
   
   <url>
-    <loc>http://zando.io/post/laravel-5.3-multiple-migration-paths/</loc>
+    <loc>https://zando.io/post/laravel-5.3-multiple-migration-paths/</loc>
     <lastmod>2016-05-25T21:21:08+00:00</lastmod>
   </url>
   
   <url>
-    <loc>http://zando.io/</loc>
+    <loc>https://zando.io/</loc>
     <lastmod>2017-03-24T21:35:40+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://zando.io/post/</loc>
+    <loc>https://zando.io/post/</loc>
     <lastmod>2017-03-24T21:35:40+00:00</lastmod>
     <priority>0</priority>
   </url>

@@ -5,11 +5,26 @@ title = "Using HA Proxy for SaaS systems - Custom Domains"
 
 +++
 
+<style>
+.hljs {
+    white-space: pre;
+    overflow-x: auto;
+}
+</style>
+
 A common problem with setting up a SaaS system is how to manage the customers on a custom domain.
 
-Its easy when everybody enters your system through `example.com`, and even `account-name.example.com` wildcards, but what if your system offers the ability to have a custom domain such as `zando.io`.
+It's easy when everybody enters your system through `example.com`, and even `account-name.example.com` wildcards, but what if your system offers the ability to have a custom domain such as `zando.io`.
 
 This is a problem we had at Shopblocks, and I tried a few ways of solving it. 
+
+---
+
+If you are experienced with HA Proxy and just want to see the configuration, skip to the bottom.
+
+If you want to experience the journey with me, read on!
+
+---
 
 The first involved using Ansible to create a new virtual host for Apache and then reloading the apache server. 
 
@@ -38,7 +53,7 @@ If we could solve:
 
 Then we should be in a much better position.
 
-It would allow us to more easily perform upgrades on our application servers,
+It would allow us to more easily perform upgrades on our application servers.
 
 The possibilities for upgrades were plentiful; whether that be changing from Apache to Nginx, adding more servers to the clusters easily or even moving to completely different architecture in the backend (for example, NodeJS instead of Apache + PHP).
 
@@ -50,7 +65,7 @@ It seemed like we were going down the correct route.
 
 The first problem to solve is forcing HTTP to HTTPS redirects. This is very easy to do in HA Proxy
 
-```
+```ini
 frontend http
     bind :80
 
@@ -80,7 +95,7 @@ Customers can also setup a custom domain. This gets provided with a Lets Encrypt
 
 Allowing Lets Encrypt certificates in this setup is a topic of its own, but the gist is you need to get the certificate in `pem` format, which involves concatonating the `private key` and `ceritifcate` together into a flat directory file.
 
-```
+```ini
 frontend https
     bind :443 ssl crt /path/to/certificates
 
@@ -89,13 +104,13 @@ frontend https
 
 This directory of certificates must be flat, contain at least 1 certificate that is valid, and be in `.pem` format. The filename of the certificate does not matter.
 
-Note, that this method uses SNI headers from the request, and so some requests from old browsers, for example Android 2.3, may not return with the correct certificate, and instead take the first certificate it finds. This is not a major issue, since the systems that use SNI are largely outdated and minimally used.
+Note, that this method uses SNI headers from the request, and so some requests from old browsers, for example Android 2.3, may not return with the correct certificate, and instead take the first certificate it finds. This is not a major issue, since the systems that do not use SNI are largely outdated and less commonly used.
 
 ---
 
 Now that all of our traffic is HTTPS and is being terminated, we need to load balance the requests and send them through to our web servers.
 
-```
+```ini
 frontend https
     bind :443 ssl crt /path/to/certificates
 
@@ -112,7 +127,7 @@ Here we have 2 servers defined in our backend named `core`. The backend name doe
 
 The two servers are being referenced using a private network IP. You can use either public or private network IP's, however I would suggest private networking so that you can have finer control and limit direct access to the server.
 
-Because of the SSL being already terminated, send the request through on port 80.
+Because of the SSL has already been terminated in the load balancer, we now have a plain HTTP request which we will send through on port 80 to our web server.
 
 ---
 
@@ -126,7 +141,7 @@ This has some caveats, such as not being able to use the HTTP_HOST server variab
 
 I am going to map the request through to `system.example.com` in this example. In reality you can set this to any domain, whether you control it or not since no DNS lookups take place.
 
-```
+```ini
 backend core
     ...
 
@@ -139,13 +154,13 @@ The domain you choose to replace `system.example.com` needs to be recognised by 
 
 ---
 
-You are now getting the correct page, but your system does no know which domain was originally requested, and by extension, what the customer's ID is.
+You are now getting the correct page, but your system does not know which domain was originally requested, and by extension, what the customer's ID is.
 
-To fix this, we will need a map of all domains to customer ID.
+To fix this, we will need a map of all domains to a customer ID.
 
 This is stored as a simple key => value pair in a text file.
 
-```
+```ini
 domain1.com 1
 domain2.com 2
 domain3.com 3
@@ -157,7 +172,7 @@ This file is going to be referred to as our `customer.map` file.
 
 Whenever a new customer or domain gets added to your system, you simply need to append to this file, and reload haproxy.
 
-```
+```ini
 frontend https
     ...
 
@@ -174,7 +189,7 @@ We now have the system assigning the `X-Customer-ID` for domains that the map fi
 
 If this is okay in your system, then leave it as it is, however if you do not want to resolve requests at all for any domains you do not recognise then above the `http-request` line, you can add the following.
 
-```
+```ini
 frontend https
     ...
 
@@ -189,7 +204,7 @@ frontend https
 
 Now the connection will drop immediately for any domain requests not recognised in the `customer.map` file.
 
-We determine whether somebody is a customer using an Access Control List (acl). 
+We determine whether somebody is a customer using an [Access Control List (acl)](https://en.wikipedia.org/wiki/Access_control_list). 
 
 This will create a variable called `is_customer` which will be a variable based on the `found` method specified by the `-m` flag used.
 
@@ -199,7 +214,7 @@ We can assume that if the domain is found in the list, they are a customer of ou
 
 Putting that all together you should have something that looks like the following
 
-```
+```ini
 frontend http
     bind :80
 
@@ -228,3 +243,5 @@ backend core
 And that is the basics of setting up a SaaS resolver in HA proxy and passing it through to Apache.
 
 If you have any questions, feel free to send me a message on [twitter](https://twitter.com/bowersbros) or [email me](mailto:bowersbros+haproxy_blog_post@gmail.com)
+
+Thank you to [Hugojmd](https://twitter.com/hugojmd) for proof reading and spotting mistakes.

@@ -20,10 +20,9 @@
 		
 
 		<meta property="og:title" content="Using HA Proxy for SaaS systems - Custom Domains" />
-<meta property="og:description" content="A common problem with setting up a SaaS system is how to manage the customers on a custom domain.
-Its easy when everybody enters your system through example.com, and even account-name.example.com wildcards, but what if your system offers the ability to have a custom domain such as zando.io.
-This is a problem we had at Shopblocks, and I tried a few ways of solving it.
-The first involved using Ansible to create a new virtual host for Apache and then reloading the apache server." />
+<meta property="og:description" content=".hljs { white-space: pre; overflow-x: auto; }  A common problem with setting up a SaaS system is how to manage the customers on a custom domain.
+It&rsquo;s easy when everybody enters your system through example.com, and even account-name.example.com wildcards, but what if your system offers the ability to have a custom domain such as zando.io.
+This is a problem we had at Shopblocks, and I tried a few ways of solving it." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://zando.io/post/haproxy-saas-custom-domains/" />
 
@@ -45,14 +44,13 @@ The first involved using Ansible to create a new virtual host for Apache and the
 	    
 	    
 <meta itemprop="name" content="Using HA Proxy for SaaS systems - Custom Domains">
-<meta itemprop="description" content="A common problem with setting up a SaaS system is how to manage the customers on a custom domain.
-Its easy when everybody enters your system through example.com, and even account-name.example.com wildcards, but what if your system offers the ability to have a custom domain such as zando.io.
-This is a problem we had at Shopblocks, and I tried a few ways of solving it.
-The first involved using Ansible to create a new virtual host for Apache and then reloading the apache server.">
+<meta itemprop="description" content=".hljs { white-space: pre; overflow-x: auto; }  A common problem with setting up a SaaS system is how to manage the customers on a custom domain.
+It&rsquo;s easy when everybody enters your system through example.com, and even account-name.example.com wildcards, but what if your system offers the ability to have a custom domain such as zando.io.
+This is a problem we had at Shopblocks, and I tried a few ways of solving it.">
 
 
 <meta itemprop="dateModified" content="2017-03-24T21:35:40&#43;00:00" />
-<meta itemprop="wordCount" content="1344">
+<meta itemprop="wordCount" content="1411">
 
 
 
@@ -66,10 +64,9 @@ The first involved using Ansible to create a new virtual host for Apache and the
 
 <meta name="twitter:text:title" content="Using HA Proxy for SaaS systems - Custom Domains"/>
 <meta name="twitter:title" content="Using HA Proxy for SaaS systems - Custom Domains"/>
-<meta name="twitter:description" content="A common problem with setting up a SaaS system is how to manage the customers on a custom domain.
-Its easy when everybody enters your system through example.com, and even account-name.example.com wildcards, but what if your system offers the ability to have a custom domain such as zando.io.
-This is a problem we had at Shopblocks, and I tried a few ways of solving it.
-The first involved using Ansible to create a new virtual host for Apache and then reloading the apache server."/>
+<meta name="twitter:description" content=".hljs { white-space: pre; overflow-x: auto; }  A common problem with setting up a SaaS system is how to manage the customers on a custom domain.
+It&rsquo;s easy when everybody enters your system through example.com, and even account-name.example.com wildcards, but what if your system offers the ability to have a custom domain such as zando.io.
+This is a problem we had at Shopblocks, and I tried a few ways of solving it."/>
 <meta name="twitter:site" content="@https://twitter.com/bowersbros"/>
 
 	</head>
@@ -99,11 +96,26 @@ The first involved using Ansible to create a new virtual host for Apache and the
                     </h2>
                 </header>
                 <section id="post-body">
-                    <p>A common problem with setting up a SaaS system is how to manage the customers on a custom domain.</p>
+                    <style>
+.hljs {
+    white-space: pre;
+    overflow-x: auto;
+}
+</style>
 
-<p>Its easy when everybody enters your system through <code>example.com</code>, and even <code>account-name.example.com</code> wildcards, but what if your system offers the ability to have a custom domain such as <code>zando.io</code>.</p>
+<p>A common problem with setting up a SaaS system is how to manage the customers on a custom domain.</p>
+
+<p>It&rsquo;s easy when everybody enters your system through <code>example.com</code>, and even <code>account-name.example.com</code> wildcards, but what if your system offers the ability to have a custom domain such as <code>zando.io</code>.</p>
 
 <p>This is a problem we had at Shopblocks, and I tried a few ways of solving it.</p>
+
+<hr />
+
+<p>If you are experienced with HA Proxy and just want to see the configuration, skip to the bottom.</p>
+
+<p>If you want to experience the journey with me, read on!</p>
+
+<hr />
 
 <p>The first involved using Ansible to create a new virtual host for Apache and then reloading the apache server.</p>
 
@@ -134,7 +146,7 @@ The first involved using Ansible to create a new virtual host for Apache and the
 
 <p>Then we should be in a much better position.</p>
 
-<p>It would allow us to more easily perform upgrades on our application servers,</p>
+<p>It would allow us to more easily perform upgrades on our application servers.</p>
 
 <p>The possibilities for upgrades were plentiful; whether that be changing from Apache to Nginx, adding more servers to the clusters easily or even moving to completely different architecture in the backend (for example, NodeJS instead of Apache + PHP).</p>
 
@@ -146,7 +158,7 @@ The first involved using Ansible to create a new virtual host for Apache and the
 
 <p>The first problem to solve is forcing HTTP to HTTPS redirects. This is very easy to do in HA Proxy</p>
 
-<pre><code>frontend http
+<pre><code class="language-ini">frontend http
     bind :80
 
     redirect scheme https code 301
@@ -175,7 +187,7 @@ frontend https
 
 <p>Allowing Lets Encrypt certificates in this setup is a topic of its own, but the gist is you need to get the certificate in <code>pem</code> format, which involves concatonating the <code>private key</code> and <code>ceritifcate</code> together into a flat directory file.</p>
 
-<pre><code>frontend https
+<pre><code class="language-ini">frontend https
     bind :443 ssl crt /path/to/certificates
 
     # We will fill this in later
@@ -183,13 +195,13 @@ frontend https
 
 <p>This directory of certificates must be flat, contain at least 1 certificate that is valid, and be in <code>.pem</code> format. The filename of the certificate does not matter.</p>
 
-<p>Note, that this method uses SNI headers from the request, and so some requests from old browsers, for example Android 2.3, may not return with the correct certificate, and instead take the first certificate it finds. This is not a major issue, since the systems that use SNI are largely outdated and minimally used.</p>
+<p>Note, that this method uses SNI headers from the request, and so some requests from old browsers, for example Android 2.3, may not return with the correct certificate, and instead take the first certificate it finds. This is not a major issue, since the systems that do not use SNI are largely outdated and less commonly used.</p>
 
 <hr />
 
 <p>Now that all of our traffic is HTTPS and is being terminated, we need to load balance the requests and send them through to our web servers.</p>
 
-<pre><code>frontend https
+<pre><code class="language-ini">frontend https
     bind :443 ssl crt /path/to/certificates
 
     use_backend core
@@ -205,7 +217,7 @@ backend core
 
 <p>The two servers are being referenced using a private network IP. You can use either public or private network IP&rsquo;s, however I would suggest private networking so that you can have finer control and limit direct access to the server.</p>
 
-<p>Because of the SSL being already terminated, send the request through on port 80.</p>
+<p>Because of the SSL has already been terminated in the load balancer, we now have a plain HTTP request which we will send through on port 80 to our web server.</p>
 
 <hr />
 
@@ -219,7 +231,7 @@ backend core
 
 <p>I am going to map the request through to <code>system.example.com</code> in this example. In reality you can set this to any domain, whether you control it or not since no DNS lookups take place.</p>
 
-<pre><code>backend core
+<pre><code class="language-ini">backend core
     ...
 
     http-request set-header Host system.example.com
@@ -231,13 +243,13 @@ backend core
 
 <hr />
 
-<p>You are now getting the correct page, but your system does no know which domain was originally requested, and by extension, what the customer&rsquo;s ID is.</p>
+<p>You are now getting the correct page, but your system does not know which domain was originally requested, and by extension, what the customer&rsquo;s ID is.</p>
 
-<p>To fix this, we will need a map of all domains to customer ID.</p>
+<p>To fix this, we will need a map of all domains to a customer ID.</p>
 
 <p>This is stored as a simple key =&gt; value pair in a text file.</p>
 
-<pre><code>domain1.com 1
+<pre><code class="language-ini">domain1.com 1
 domain2.com 2
 domain3.com 3
 </code></pre>
@@ -248,7 +260,7 @@ domain3.com 3
 
 <p>Whenever a new customer or domain gets added to your system, you simply need to append to this file, and reload haproxy.</p>
 
-<pre><code>frontend https
+<pre><code class="language-ini">frontend https
     ...
 
     http-request set-header X-Customer-ID %[req.hdr(host),lower,map_str(/path/to/customer.map)]
@@ -264,7 +276,7 @@ domain3.com 3
 
 <p>If this is okay in your system, then leave it as it is, however if you do not want to resolve requests at all for any domains you do not recognise then above the <code>http-request</code> line, you can add the following.</p>
 
-<pre><code>frontend https
+<pre><code class="language-ini">frontend https
     ...
 
     acl is_customer hdr(host),lower,map_str(/path/to/customer.map) -m found
@@ -278,7 +290,7 @@ domain3.com 3
 
 <p>Now the connection will drop immediately for any domain requests not recognised in the <code>customer.map</code> file.</p>
 
-<p>We determine whether somebody is a customer using an Access Control List (acl).</p>
+<p>We determine whether somebody is a customer using an <a href="https://en.wikipedia.org/wiki/Access_control_list">Access Control List (acl)</a>.</p>
 
 <p>This will create a variable called <code>is_customer</code> which will be a variable based on the <code>found</code> method specified by the <code>-m</code> flag used.</p>
 
@@ -288,7 +300,7 @@ domain3.com 3
 
 <p>Putting that all together you should have something that looks like the following</p>
 
-<pre><code>frontend http
+<pre><code class="language-ini">frontend http
     bind :80
 
     redirect scheme https code 301
@@ -316,6 +328,8 @@ backend core
 <p>And that is the basics of setting up a SaaS resolver in HA proxy and passing it through to Apache.</p>
 
 <p>If you have any questions, feel free to send me a message on <a href="https://twitter.com/bowersbros">twitter</a> or <a href="mailto:bowersbros+haproxy_blog_post@gmail.com">email me</a></p>
+
+<p>Thank you to <a href="https://twitter.com/hugojmd">Hugojmd</a> for proof reading and spotting mistakes.</p>
 
                 </section>
             </article>

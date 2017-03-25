@@ -15,11 +15,26 @@
       <pubDate>Fri, 24 Mar 2017 21:35:40 +0000</pubDate>
       
       <guid>https://zando.io/post/haproxy-saas-custom-domains/</guid>
-      <description>&lt;p&gt;A common problem with setting up a SaaS system is how to manage the customers on a custom domain.&lt;/p&gt;
+      <description>&lt;style&gt;
+.hljs {
+    white-space: pre;
+    overflow-x: auto;
+}
+&lt;/style&gt;
 
-&lt;p&gt;Its easy when everybody enters your system through &lt;code&gt;example.com&lt;/code&gt;, and even &lt;code&gt;account-name.example.com&lt;/code&gt; wildcards, but what if your system offers the ability to have a custom domain such as &lt;code&gt;zando.io&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;A common problem with setting up a SaaS system is how to manage the customers on a custom domain.&lt;/p&gt;
+
+&lt;p&gt;It&amp;rsquo;s easy when everybody enters your system through &lt;code&gt;example.com&lt;/code&gt;, and even &lt;code&gt;account-name.example.com&lt;/code&gt; wildcards, but what if your system offers the ability to have a custom domain such as &lt;code&gt;zando.io&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;This is a problem we had at Shopblocks, and I tried a few ways of solving it.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;If you are experienced with HA Proxy and just want to see the configuration, skip to the bottom.&lt;/p&gt;
+
+&lt;p&gt;If you want to experience the journey with me, read on!&lt;/p&gt;
+
+&lt;hr /&gt;
 
 &lt;p&gt;The first involved using Ansible to create a new virtual host for Apache and then reloading the apache server.&lt;/p&gt;
 
@@ -50,7 +65,7 @@
 
 &lt;p&gt;Then we should be in a much better position.&lt;/p&gt;
 
-&lt;p&gt;It would allow us to more easily perform upgrades on our application servers,&lt;/p&gt;
+&lt;p&gt;It would allow us to more easily perform upgrades on our application servers.&lt;/p&gt;
 
 &lt;p&gt;The possibilities for upgrades were plentiful; whether that be changing from Apache to Nginx, adding more servers to the clusters easily or even moving to completely different architecture in the backend (for example, NodeJS instead of Apache + PHP).&lt;/p&gt;
 
@@ -62,7 +77,7 @@
 
 &lt;p&gt;The first problem to solve is forcing HTTP to HTTPS redirects. This is very easy to do in HA Proxy&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;frontend http
+&lt;pre&gt;&lt;code class=&#34;language-ini&#34;&gt;frontend http
     bind :80
 
     redirect scheme https code 301
@@ -91,7 +106,7 @@ frontend https
 
 &lt;p&gt;Allowing Lets Encrypt certificates in this setup is a topic of its own, but the gist is you need to get the certificate in &lt;code&gt;pem&lt;/code&gt; format, which involves concatonating the &lt;code&gt;private key&lt;/code&gt; and &lt;code&gt;ceritifcate&lt;/code&gt; together into a flat directory file.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;frontend https
+&lt;pre&gt;&lt;code class=&#34;language-ini&#34;&gt;frontend https
     bind :443 ssl crt /path/to/certificates
 
     # We will fill this in later
@@ -99,13 +114,13 @@ frontend https
 
 &lt;p&gt;This directory of certificates must be flat, contain at least 1 certificate that is valid, and be in &lt;code&gt;.pem&lt;/code&gt; format. The filename of the certificate does not matter.&lt;/p&gt;
 
-&lt;p&gt;Note, that this method uses SNI headers from the request, and so some requests from old browsers, for example Android 2.3, may not return with the correct certificate, and instead take the first certificate it finds. This is not a major issue, since the systems that use SNI are largely outdated and minimally used.&lt;/p&gt;
+&lt;p&gt;Note, that this method uses SNI headers from the request, and so some requests from old browsers, for example Android 2.3, may not return with the correct certificate, and instead take the first certificate it finds. This is not a major issue, since the systems that do not use SNI are largely outdated and less commonly used.&lt;/p&gt;
 
 &lt;hr /&gt;
 
 &lt;p&gt;Now that all of our traffic is HTTPS and is being terminated, we need to load balance the requests and send them through to our web servers.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;frontend https
+&lt;pre&gt;&lt;code class=&#34;language-ini&#34;&gt;frontend https
     bind :443 ssl crt /path/to/certificates
 
     use_backend core
@@ -121,7 +136,7 @@ backend core
 
 &lt;p&gt;The two servers are being referenced using a private network IP. You can use either public or private network IP&amp;rsquo;s, however I would suggest private networking so that you can have finer control and limit direct access to the server.&lt;/p&gt;
 
-&lt;p&gt;Because of the SSL being already terminated, send the request through on port 80.&lt;/p&gt;
+&lt;p&gt;Because of the SSL has already been terminated in the load balancer, we now have a plain HTTP request which we will send through on port 80 to our web server.&lt;/p&gt;
 
 &lt;hr /&gt;
 
@@ -135,7 +150,7 @@ backend core
 
 &lt;p&gt;I am going to map the request through to &lt;code&gt;system.example.com&lt;/code&gt; in this example. In reality you can set this to any domain, whether you control it or not since no DNS lookups take place.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;backend core
+&lt;pre&gt;&lt;code class=&#34;language-ini&#34;&gt;backend core
     ...
 
     http-request set-header Host system.example.com
@@ -147,13 +162,13 @@ backend core
 
 &lt;hr /&gt;
 
-&lt;p&gt;You are now getting the correct page, but your system does no know which domain was originally requested, and by extension, what the customer&amp;rsquo;s ID is.&lt;/p&gt;
+&lt;p&gt;You are now getting the correct page, but your system does not know which domain was originally requested, and by extension, what the customer&amp;rsquo;s ID is.&lt;/p&gt;
 
-&lt;p&gt;To fix this, we will need a map of all domains to customer ID.&lt;/p&gt;
+&lt;p&gt;To fix this, we will need a map of all domains to a customer ID.&lt;/p&gt;
 
 &lt;p&gt;This is stored as a simple key =&amp;gt; value pair in a text file.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;domain1.com 1
+&lt;pre&gt;&lt;code class=&#34;language-ini&#34;&gt;domain1.com 1
 domain2.com 2
 domain3.com 3
 &lt;/code&gt;&lt;/pre&gt;
@@ -164,7 +179,7 @@ domain3.com 3
 
 &lt;p&gt;Whenever a new customer or domain gets added to your system, you simply need to append to this file, and reload haproxy.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;frontend https
+&lt;pre&gt;&lt;code class=&#34;language-ini&#34;&gt;frontend https
     ...
 
     http-request set-header X-Customer-ID %[req.hdr(host),lower,map_str(/path/to/customer.map)]
@@ -180,7 +195,7 @@ domain3.com 3
 
 &lt;p&gt;If this is okay in your system, then leave it as it is, however if you do not want to resolve requests at all for any domains you do not recognise then above the &lt;code&gt;http-request&lt;/code&gt; line, you can add the following.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;frontend https
+&lt;pre&gt;&lt;code class=&#34;language-ini&#34;&gt;frontend https
     ...
 
     acl is_customer hdr(host),lower,map_str(/path/to/customer.map) -m found
@@ -194,7 +209,7 @@ domain3.com 3
 
 &lt;p&gt;Now the connection will drop immediately for any domain requests not recognised in the &lt;code&gt;customer.map&lt;/code&gt; file.&lt;/p&gt;
 
-&lt;p&gt;We determine whether somebody is a customer using an Access Control List (acl).&lt;/p&gt;
+&lt;p&gt;We determine whether somebody is a customer using an &lt;a href=&#34;https://en.wikipedia.org/wiki/Access_control_list&#34;&gt;Access Control List (acl)&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;This will create a variable called &lt;code&gt;is_customer&lt;/code&gt; which will be a variable based on the &lt;code&gt;found&lt;/code&gt; method specified by the &lt;code&gt;-m&lt;/code&gt; flag used.&lt;/p&gt;
 
@@ -204,7 +219,7 @@ domain3.com 3
 
 &lt;p&gt;Putting that all together you should have something that looks like the following&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;frontend http
+&lt;pre&gt;&lt;code class=&#34;language-ini&#34;&gt;frontend http
     bind :80
 
     redirect scheme https code 301
@@ -232,6 +247,8 @@ backend core
 &lt;p&gt;And that is the basics of setting up a SaaS resolver in HA proxy and passing it through to Apache.&lt;/p&gt;
 
 &lt;p&gt;If you have any questions, feel free to send me a message on &lt;a href=&#34;https://twitter.com/bowersbros&#34;&gt;twitter&lt;/a&gt; or &lt;a href=&#34;mailto:bowersbros+haproxy_blog_post@gmail.com&#34;&gt;email me&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Thank you to &lt;a href=&#34;https://twitter.com/hugojmd&#34;&gt;Hugojmd&lt;/a&gt; for proof reading and spotting mistakes.&lt;/p&gt;
 </description>
     </item>
     

@@ -12,7 +12,7 @@ title = "Explaining Zend Module Entry"
 
 ---
 
-In my [last blog post](https://zando.io/writing-a-hello-world-php-7-extension/) I skirted past what `zend_module_entry` does, and just put the code there. I'm going to attempt to explain it with its many `NULL` values.
+In my [last blog post](https://zando.io/post/writing-a-hello-world-php-7-extension/) I skirted past what `zend_module_entry` does, and just put the code there. I'm going to attempt to explain it with its many `NULL` values.
 
 This is what I put in the Hello World extension:
 
